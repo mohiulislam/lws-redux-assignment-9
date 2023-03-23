@@ -1,9 +1,17 @@
 import React from "react";
+import { useGetProjectsQuery } from "../../features/projects/projectsApi";
 import { useGetTeamQuery } from "../../features/team/teamApi";
 import MainLayout from "../Layouts/MainLayout";
 
 function AddTask() {
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
+  useGetTeamQuery();
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    isError: isErrorProjects,
+    error: errorProjects,
+  } = useGetProjectsQuery();
   return (
     <MainLayout>
       <div className="text-[#111827]">
@@ -25,7 +33,6 @@ function AddTask() {
                     placeholder="Implement RTK Query"
                   />
                 </div>
-
                 <div className="fieldContainer">
                   <label>Assign To</label>
                   <select name="teamMember" id="lws-teamMember" required>
@@ -55,12 +62,23 @@ function AddTask() {
                     <option value="" hidden>
                       Select Project
                     </option>
-                    <option>Scoreboard</option>
-                    <option>Flight Booking</option>
-                    <option>Product Cart</option>
-                    <option>Book Store</option>
-                    <option>Blog Application</option>
-                    <option>Job Finder</option>
+                    {!isLoadingProjects &&
+                    !isErrorProjects &&
+                    projects.length > 0 ? (
+                      projects.map((project) => (
+                        <option key={project.id} value={project.projectName}>
+                          {project.projectName}
+                        </option>
+                      ))
+                    ) : (
+                      <option>
+                        {isLoadingProjects
+                          ? "Loading..."
+                          : isErrorProjects
+                          ? `Error: ${errorProjects.message}`
+                          : ""}
+                      </option>
+                    )}
                   </select>
                 </div>
 

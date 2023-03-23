@@ -1,10 +1,10 @@
 import React from "react";
 
-function Project() {
+function Project({ project: { projectName, colorClass } }) {
   return (
     <div className="checkbox-container">
-      <input type="checkbox" className="color-productCart" />
-      <p className="label">Product Cart</p>
+      <input type="checkbox" className={colorClass} />
+      <p className="label">{projectName}</p>
     </div>
   );
 }

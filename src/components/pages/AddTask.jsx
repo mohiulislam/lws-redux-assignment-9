@@ -1,9 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useGetProjectsQuery } from "../../features/projects/projectsApi";
+import { useAddTaskMutation } from "../../features/tasks/addTaskApi";
 import { useGetTeamQuery } from "../../features/team/teamApi";
 import MainLayout from "../Layouts/MainLayout";
 
 function AddTask() {
+  const navigate = useNavigate();
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
   const {
     data: projects,
@@ -11,6 +14,45 @@ function AddTask() {
     isError: isErrorProjects,
     error: errorProjects,
   } = useGetProjectsQuery();
+
+  const [
+    addTask,
+    {
+      isLoading: isAddingTask,
+      isError: isErrorAddingTask,
+      error: errorAddingTask,
+    },
+  ] = useAddTaskMutation();
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const { taskName, teamMember, projectName, deadline } = Object.fromEntries(
+      formData.entries()
+    );
+
+    addTask({
+      taskName,
+      teamMember: {
+        name: teamMember,
+        avatar: team.find((member) => member.name === teamMember).avatar,
+        id: team.find((member) => member.name === teamMember).id,
+      },
+      project: {
+        projectName,
+        id: projects.find((project) => project.projectName === projectName).id,
+        colorClass: projects.find(
+          (project) => project.projectName === projectName
+        ).colorClass,
+      },
+      deadline,
+      status: "pending",
+    }).then(() => {
+      navigate("/");
+    });
+  };
   return (
     <MainLayout>
       <div className="text-[#111827]">
@@ -21,7 +63,7 @@ function AddTask() {
             </h1>
 
             <div className="justify-center mb-10 space-y-2 md:flex md:space-y-0">
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="fieldContainer">
                   <label htmlFor="lws-taskName">Task Name</label>
                   <input

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useGetProjectsQuery } from "../../features/projects/projectsApi";
 import { useGetTeamQuery } from "../../features/team/teamApi";
+
 import MainLayout from "../Layouts/MainLayout";
 import { useParams } from "react-router-dom";
-import { useGetTaskQuery } from "../../features/task/taskApi";
+import { useGetTaskQuery } from "../../features/tasks/taskApi";
+
 function AddTask() {
   const { id } = useParams();
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
@@ -28,7 +30,6 @@ function AddTask() {
     projectName: "",
     deadline: "",
   });
-  console.log(task);
 
   useEffect(() => {
     if (!isLoadingTask && task) {
@@ -48,7 +49,13 @@ function AddTask() {
       [name]: value,
     }));
   };
+  if (isLoadingTask) {
+    return <div>Loading...</div>;
+  }
 
+  if (isErrorTask) {
+    return <div>Error: {errorTask.message}</div>;
+  }
   return (
     <MainLayout>
       <div className="text-[#111827]">

@@ -8,6 +8,18 @@ export const addTaskApi = apiSlice.injectEndpoints({
         method: "POST",
         body: task,
       }),
+      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+        try {
+          const { data: addedTask } = await queryFulfilled;
+          dispatch(
+            apiSlice.util.updateQueryData("getTasks", undefined, (draft) => {
+              draft.push(addedTask);
+            })
+          );
+        } catch (error) {
+          console.error(error);
+        }
+      },
     }),
   }),
 });

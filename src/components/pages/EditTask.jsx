@@ -3,13 +3,22 @@ import { useGetProjectsQuery } from "../../features/projects/projectsApi";
 import { useGetTeamQuery } from "../../features/team/teamApi";
 
 import MainLayout from "../Layouts/MainLayout";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetTaskQuery } from "../../features/tasks/taskApi";
+import { useUpdateTaskMutation } from "../../features/tasks/updateTaskSlice";
 
 function AddTask() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
-
+  const [
+    updateTask,
+    {
+      isLoading: isUpdatingTask,
+      isError: isErrorUpdatingTask,
+      error: errorUpdatingTask,
+    },
+  ] = useUpdateTaskMutation();
   const {
     data: projects,
     isLoading: isLoadingProjects,
@@ -49,6 +58,39 @@ function AddTask() {
       [name]: value,
     }));
   };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const { taskName, teamMember, projectName, deadline } = Object.fromEntries(
+      formData.entries()
+    );
+
+    updateTask({
+      id,
+      task: {
+        taskName,
+        teamMember: {
+          name: teamMember,
+          avatar: team.find((member) => member.name === teamMember).avatar,
+          id: team.find((member) => member.name === teamMember).id,
+        },
+        project: {
+          projectName,
+          id: projects.find((project) => project.projectName === projectName)
+            .id,
+          colorClass: projects.find(
+            (project) => project.projectName === projectName
+          ).colorClass,
+        },
+        deadline,
+      },
+    }).then(() => {
+      navigate("/");
+    });
+  };
   if (isLoadingTask) {
     return <div>Loading...</div>;
   }
@@ -66,7 +108,7 @@ function AddTask() {
             </h1>
 
             <div className="justify-center mb-10 space-y-2 md:flex md:space-y-0">
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="fieldContainer">
                   <label htmlFor="lws-taskName">Task Name</label>
                   <input

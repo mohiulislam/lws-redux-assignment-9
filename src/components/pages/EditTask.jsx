@@ -1,23 +1,61 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useGetProjectsQuery } from "../../features/projects/projectsApi";
 import { useGetTeamQuery } from "../../features/team/teamApi";
 import MainLayout from "../Layouts/MainLayout";
-
+import { useParams } from "react-router-dom";
+import { useGetTaskQuery } from "../../features/task/taskApi";
 function AddTask() {
+  const { id } = useParams();
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
+
   const {
     data: projects,
     isLoading: isLoadingProjects,
     isError: isErrorProjects,
     error: errorProjects,
   } = useGetProjectsQuery();
+
+  const {
+    data: task,
+    isLoading: isLoadingTask,
+    isError: isErrorTask,
+    error: errorTask,
+  } = useGetTaskQuery(id);
+
+  const [formData, setFormData] = useState({
+    taskName: "",
+    teamMember: "",
+    projectName: "",
+    deadline: "",
+  });
+  console.log(task);
+
+  useEffect(() => {
+    if (!isLoadingTask && task) {
+      setFormData({
+        taskName: task.taskName,
+        teamMember: task.teamMember.name,
+        projectName: task.project.projectName,
+        deadline: task.deadline,
+      });
+    }
+  }, [isLoadingTask, task]);
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
   return (
     <MainLayout>
       <div className="text-[#111827]">
         <div className="container relative">
           <main className="relative z-20 max-w-3xl mx-auto rounded-lg xl:max-w-none">
             <h1 className="mt-4 mb-8 text-3xl font-bold text-center text-gray-800">
-              Create Task for Your Team
+              Edit Task for Your Team
             </h1>
 
             <div className="justify-center mb-10 space-y-2 md:flex md:space-y-0">
@@ -25,6 +63,8 @@ function AddTask() {
                 <div className="fieldContainer">
                   <label htmlFor="lws-taskName">Task Name</label>
                   <input
+                    value={formData.taskName}
+                    onChange={handleInputChange}
                     type="text"
                     name="taskName"
                     id="lws-taskName"
@@ -34,7 +74,13 @@ function AddTask() {
                 </div>
                 <div className="fieldContainer">
                   <label>Assign To</label>
-                  <select name="teamMember" id="lws-teamMember" required>
+                  <select
+                    value={formData.teamMember}
+                    onChange={handleInputChange}
+                    name="teamMember"
+                    id="lws-teamMember"
+                    required
+                  >
                     <option value="" hidden>
                       Select Member
                     </option>
@@ -57,7 +103,13 @@ function AddTask() {
                 </div>
                 <div className="fieldContainer">
                   <label htmlFor="lws-projectName">Project Name</label>
-                  <select id="lws-projectName" name="projectName" required>
+                  <select
+                    value={formData.projectName}
+                    onChange={handleInputChange}
+                    id="lws-projectName"
+                    name="projectName"
+                    required
+                  >
                     <option value="" hidden>
                       Select Project
                     </option>
@@ -84,6 +136,8 @@ function AddTask() {
                 <div className="fieldContainer">
                   <label htmlFor="lws-deadline">Deadline</label>
                   <input
+                    value={formData.deadline}
+                    onChange={handleInputChange}
                     type="date"
                     name="deadline"
                     id="lws-deadline"

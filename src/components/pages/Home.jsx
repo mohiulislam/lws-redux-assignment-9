@@ -6,6 +6,7 @@ import TeamMember from "../subComponents/TeamMember";
 import MainLayout from "../Layouts/MainLayout";
 import { useGetTeamQuery } from "../../features/team/teamApi";
 import { useGetProjectsQuery } from "../../features/projects/projectsApi";
+import { useGetTasksQuery } from "../../features/tasks/tasksApi";
 
 function Home() {
   const { data: team, isLoading, isError, error } = useGetTeamQuery();
@@ -15,6 +16,14 @@ function Home() {
     isError: isErrorProjects,
     error: errorProjects,
   } = useGetProjectsQuery();
+  useGetTeamQuery();
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    isError: isErrorTasks,
+    error: errorTasks,
+  } = useGetTasksQuery();
+
   let teamMemberContent;
   if (isLoading) {
     <div>Loading...</div>;
@@ -27,7 +36,7 @@ function Home() {
   }
   if (!isLoading && !isError && team.length > 0) {
     teamMemberContent = team.map((member) => (
-      <TeamMember member={member} key={member.id} />
+      <TeamMember member={member || {}} key={member.id} />
     ));
   }
   let projectContent;
@@ -43,7 +52,24 @@ function Home() {
   }
   if (!isLoadingProjects && !isErrorProjects && projects.length > 0) {
     projectContent = projects.map((project) => (
-      <Project project={project} key={project.id} />
+      <Project project={project || {}} key={project.id} />
+    ));
+  }
+
+  let tasksContent;
+
+  if (isLoadingTasks) {
+    tasksContent = <div>Loading...</div>;
+  }
+  if (!isLoadingTasks && isErrorTasks) {
+    tasksContent = <div>{errorTasks}</div>;
+  }
+  if (!isLoadingTasks && !isErrorTasks && tasks?.length === 0) {
+    tasksContent = <div>Not Found</div>;
+  }
+  if (!isLoadingTasks && !isErrorTasks && tasks.length > 0) {
+    tasksContent = tasks.map((task) => (
+      <Task task={task || {}} key={task.id} />
     ));
   }
 
@@ -52,8 +78,8 @@ function Home() {
       <div className="text-[#111827]">
         <div className="container relative">
           <div className="sidebar">
-            <h3 class="text-xl font-bold">Projects</h3>
-            <div class="mt-3 space-y-4">{projectContent}</div>
+            <h3 className="text-xl font-bold">Projects</h3>
+            <div className="mt-3 space-y-4">{projectContent}</div>
             <div></div>
             <div className="mt-8">
               <h3 className="text-xl font-bold ">Team Members</h3>
@@ -82,9 +108,7 @@ function Home() {
                   <span className="group-hover:text-indigo-500">Add New</span>
                 </Link>
               </div>
-              <div className="lws-task-list">
-                <Task />
-              </div>
+              <div className="lws-task-list">{tasksContent}</div>
             </main>
           </div>
         </div>

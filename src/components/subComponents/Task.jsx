@@ -1,25 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+function Task({
+  task: {
+    taskName,
+    id,
+    deadline,
+    status,
+    teamMember: { name, avatar },
+    project: { projectName, colorClass },
+  },
+}) {
+  const navigate = useNavigate();
+  const formattedDate = new Date(deadline).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+  });
+  const [taskStatus, setTaskStatus] = useState(status);
 
-function Task() {
+  const handleStatusChange = (event) => {
+    setTaskStatus(event.target.value);
+  };
+  const handleEditClick = () => {
+    navigate(`/EditTask/${id}`);
+  };
+
   return (
     <div className="lws-task">
       <div className="flex items-center gap-2 text-slate">
-        <h2 className="lws-date">26</h2>
-        <h4 className="lws-month">March</h4>
+        <h2 className="lws-date">{formattedDate.split(" ")[1]}</h2>
+        <h4 className="lws-month">{formattedDate.split(" ")[0]}</h4>
       </div>
       <div className="lws-taskContainer">
-        <h1 className="lws-task-title">Last over need 15 runs</h1>
-        <span className="lws-task-badge color-scoreboard">Scoreboard</span>
+        <h1 className="lws-task-title">{taskName}</h1>
+        <span className={`lws-task-badge ${colorClass}`}>{projectName}</span>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <img
-            src={require(`../../assets/images/avatars/ferdous.png`)}
+            src={require(`../../assets${avatar}`)}
             className="team-avater"
             alt="Avatar"
           />
-          <p className="lws-task-assignedOn">Ferdous Hassan</p>
+          <p className="lws-task-assignedOn">{name}</p>
         </div>
         <button className="lws-delete">
           <svg
@@ -36,7 +59,7 @@ function Task() {
             />
           </svg>
         </button>
-        <button className="lws-edit">
+        <button className="lws-edit" onClick={handleEditClick}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -52,7 +75,11 @@ function Task() {
             />
           </svg>
         </button>
-        <select className="lws-status">
+        <select
+          onChange={handleStatusChange}
+          value={taskStatus}
+          className="lws-status"
+        >
           <option value="pending">Pending</option>
           <option value="inProgress">In Progress</option>
           <option value="complete">Completed</option>

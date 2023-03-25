@@ -12,7 +12,6 @@ import { initiateFilter } from "../../features/filter/filterSlice";
 
 function Home() {
   const searchTerm = useSelector((state) => state.search.searchTerm);
-  console.log(searchTerm);
   const filterTerms = useSelector((state) => state.filter.filterBy);
   const dispatch = useDispatch();
   const { data: team, isLoading, isError, error } = useGetTeamQuery();

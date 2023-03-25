@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteTaskMutation } from "../../features/tasks/deleteTaskApi";
+import { useUpdateTaskStatusMutation } from "../../features/tasks/updateTaskStatusApi";
 function Task({
   task: {
     taskName,
@@ -11,6 +12,8 @@ function Task({
     project: { projectName, colorClass },
   },
 }) {
+  const [updateTaskStatus, { isLoading, error, isError, isSuccess }] =
+    useUpdateTaskStatusMutation();
   const [
     deleteTask,
     {
@@ -20,15 +23,24 @@ function Task({
       erroreDeleteTask,
     },
   ] = useDeleteTaskMutation();
+
   const navigate = useNavigate();
+
   const formattedDate = new Date(deadline).toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
   });
+
   const [taskStatus, setTaskStatus] = useState(status);
 
+  useEffect(() => {
+    setTaskStatus(status);
+  }, [setTaskStatus, status]);
+
   const handleStatusChange = (event) => {
-    setTaskStatus(event.target.value);
+    const newStatus = event.target.value;
+    setTaskStatus(newStatus);
+    updateTaskStatus({ id, status: newStatus });
   };
   const handleEdit = () => {
     navigate(`/EditTask/${id}`);
@@ -56,7 +68,7 @@ function Task({
           />
           <p className="lws-task-assignedOn">{name}</p>
         </div>
-        {status === "completed" ? (
+        {status === "complete" ? (
           <button onClick={handleDelete} className="lws-delete">
             <svg
               fill="none"
